@@ -46,7 +46,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/post", (req, res) => {
-  console.log(req.body);
+  console.log(`/post : ${req.body}`);
   const user_id = req.body.user_id;
   const user_name = req.body.user_name;
 
@@ -62,6 +62,26 @@ app.post("/post", (req, res) => {
     }
   );
   if (!querySuccess) res.send("POST TRY");
+});
+
+app.post("/validation", (req, res) => {
+  console.log(`/validation : ${req.body}`);
+  const id = req.body.id;
+  const password = req.body.password;
+
+  //const querySuccess = connection.query(
+  //  "INSERT INTO users VALUES(?,?)",
+  //  [user_id, user_name],
+  //  (err, result) => {
+  //    if (err) {
+  //      console.log("insert into query failed", err);
+  //    } else {
+  //      res.send("POSTED");
+  //    }
+  //  }
+  //);
+  //if (!querySuccess) res.send("POST TRY");
+  res.send({id, password});
 });
 
 app.get("api/users/user_id", (req, res) => {

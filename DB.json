@@ -1,0 +1,18 @@
+//DB
+//	my_db
+
+// table
+//	users
+//		user_id(int)
+//		user_name(varchar)
+//		user_email(varchar)
+//	thread
+//		user_id(int)
+//		upload_time(datetime)
+//		thread_content(text)
+//		thread_id(int)
+//	comment
+//		parent_id
+//		user_id(int)
+//		comment_content(text)
+//		upload_time(datetime)
