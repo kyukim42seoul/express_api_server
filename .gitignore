@@ -1,3 +1,4 @@
 node_modules
 package-lock.json
 mysql_user.json
+*.lock

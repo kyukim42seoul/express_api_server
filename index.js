@@ -1,102 +1,61 @@
-let mysql = require("mysql");
-let connection = mysql.createConnection({
-  host: "",
-  user: "",
-  password: "",
-  database: "",
-});
-
-/*
-connection.connect();
-
-connection.query("SELECT 1 + 1 AS solution", (err, rows, fields) => {
-  if (err) throw err;
-  console.log("The solution is: ", rows[0].solution);
-  console.log(rows);
-});
-
-connection.end();
-*/
+const express = require("express");
+const cors = require("cors");
+const mysql = require("mysql");
 const bodyParser = require("body-parser");
-let express = require("express");
-let cors = require("cors");
-let app = express();
+const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+
+const PORT = 3232;
+
+// DB
+let db;
+
+try {
+    db = mysql.createConnection({
+      host: "127.0.0.1",
+      user: "test_twitter",
+      password: "kim13245",
+      database: "my_db",
+      port: 3306,
+    });
+  } catch(error) {
+    console.error("mysql.createConnection error: ", error);
+  }
+
+
+// GET
 app.get("/", (req, res) => {
-  connection.connect();
-  /*
-  data = connection.query("SELECT * FROM users", (err, rows, fields) => {
-    if (err) {
-      console.log("err");
-      throw err;
-    }
-
-    if (fields.length > 0) {
-      return JSON.parse(JSON.stringify(fields));
-    }
-    console.log("rows returned");
-    return rows;
-  });
-  console.log(data);
-*/
-  connection.end();
-  res.send("/ required");
+  res.send("Response from Server /");
 });
 
-app.post("/post", (req, res) => {
-  console.log(`/post : ${req.body}`);
-  const user_id = req.body.user_id;
-  const user_name = req.body.user_name;
-
-  const querySuccess = connection.query(
-    "INSERT INTO users VALUES(?,?)",
-    [user_id, user_name],
-    (err, result) => {
-      if (err) {
-        console.log("insert into query failed", err);
-      } else {
-        res.send("POSTED");
-      }
-    }
-  );
-  if (!querySuccess) res.send("POST TRY");
+app.get("/api", (req, res)=>{
+  const requestData = req.query;
+  console.log(req.query);
+  res.send(`GET request data: ${JSON.stringify(requestData)}`);
 });
 
-app.post("/validation", (req, res) => {
-  console.log(`/validation : ${req.body}`);
-  const id = req.body.id;
-  const password = req.body.password;
 
-  //const querySuccess = connection.query(
-  //  "INSERT INTO users VALUES(?,?)",
-  //  [user_id, user_name],
-  //  (err, result) => {
-  //    if (err) {
-  //      console.log("insert into query failed", err);
-  //    } else {
-  //      res.send("POSTED");
-  //    }
-  //  }
-  //);
-  //if (!querySuccess) res.send("POST TRY");
-  res.send({id, password});
+// POST
+app.post("/api/post", (req, res) => {
+  let userId = 1;
+  const {userName, userPw, userEmail} = req.body;
+  const fields = `(user_id, user_name, user_email, user_pw)`;
+  const fullQuery = `INSERT INTO users ${fields} VALUES (?, ?, ?, ?)`;
+  const values = [userId, userName, userEmail, userPw];
+
+  console.log('Received POST request with body:', req.body);
+
+  db.connect();
+
+  try {
+    db.query(fullQuery, values);
+  } catch(error) {
+    console.error("Query error: ", error);
+  }
+
+  res.send('POST request body received');
 });
 
-app.get("api/users/user_id", (req, res) => {
-  connection.connect();
-
-  user_data = connection.query(
-    "SELECT user_id FROM users",
-    (err, rows, fields) => {
-      if (err) throw err;
-      console.log("api/users called!");
-    }
-  );
-  const serialized_user_data = String.toString(user_data);
-  console.log(`api/users serialized_data : ${serialized_user_data}`);
-  res.send({ data: serialized_user_data });
-});
-
-app.listen(3000);
+app.listen(PORT);
