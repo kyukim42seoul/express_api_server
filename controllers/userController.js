@@ -14,20 +14,53 @@ const createUser = (req, res) => {
   
 	db.getConnection((error, connection) => {
 		if (error) {
-			console.error("getConnection Error: ", error);
-			res.status(500).send("Query fail");
+			console.error("ERR_getConnection : ", error);
+			res.status(500).send("Fail create user");
 			return ;
 		}
 		try {
 			connection.query(fullQuery, values);
+			connection.release();
+			res.status(200).send('createUser Success');
 		} catch(error) {
-			console.error("Query error: ", error);
+			console.error("Query error : ", error);
 			connection.release();
 			return ;
 		}
-		connection.release();
-		res.status(200).send('createUser Success');
-		return ;
+	});
+};
+
+const login = (req, res) => {
+	const {userEmail, userPassword} = req.body;
+	const searchQuery = "SELECT * FROM users WHERE user_email = ? AND user_pw = ?";
+	const values = [userEmail, userPassword];
+
+	db.getConnection((error, connection) => {
+		if (error) {
+			console.error("ERR_login", error);
+			res.status(500).send("Fail login");
+		}
+		try {
+			connection.query(searchQuery, values, (error, result) => {
+				if (error) {
+					console.error("Query error : ", error);
+					connection.release();
+					return ;
+				};
+				if (result.length > 0) {
+					const userId = result[0].user_id.toString();
+					res.status(200).send(userId);
+					connection.release();
+					return ;
+				}
+			});
+			connection.release();
+		} catch (error) {
+			connection.error("Query error : ", error);
+			connection.release();
+			return ;
+		}
+
 	});
 };
 
@@ -35,9 +68,7 @@ const authenticateUser = (req, res) => {
 	const {userEmail, userPassword} = req.body;
 	const searchQuery = "SELECT * FROM users WHERE user_email = ? AND user_pw = ?";
 	const values = [userEmail, userPassword];
-  
-	console.log('Received POST validation request with body: ', req.body);
-  
+
 	db.getConnection((error, connection) => {
 	  try {
 		connection.query(searchQuery, values, (error, result) => {
@@ -63,5 +94,6 @@ const authenticateUser = (req, res) => {
 
 export default {
 	createUser,
+	login,
 	authenticateUser
 };
