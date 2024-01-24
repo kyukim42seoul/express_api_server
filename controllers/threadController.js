@@ -44,6 +44,7 @@ const createThread = (req, res) => {
 					return ;
 				}
 				res.status(200).send("createThread success");
+				connection.release();
 			});
 		} catch(error) {
 			console.error("Query error : ", error);
@@ -53,6 +54,41 @@ const createThread = (req, res) => {
 	});
 };
 
+const getThread = (req, res) => {
+	const { userId } = req.query;
+	const selectQuery = "SELECT * FROM thread WHERE user_id = ? ORDER BY upload_time DESC LIMIT 10";
+
+	db.getConnection((error, connection) => {
+		if (error) {
+			console.error(`ERR_getThread : `, error);
+			res.status(500).send("Fail get thread");
+			return ;
+		}
+		console.log(`getUserId : ${userId}`);
+		try {
+			console.log("start querying");
+			connection.query(selectQuery, [userId], (error, result) => {
+				if (error) {
+					console.error("ERR_getThread : ", error);
+					res.status(500).send("getThread failed");
+					return ;
+				}
+				console.log("done querying", result);
+				res.status(200).send(result);
+				connection.release();
+				console.log("end connection");
+				return ;
+			});
+		} catch(error) {
+			console.error("Query error : ", error);
+			connection.release();
+			return ;
+		}
+		console.log('connection callback over');
+	});
+};
+
 export default {
-	createThread: createThread
+	createThread: createThread,
+	getThread: getThread,
 }

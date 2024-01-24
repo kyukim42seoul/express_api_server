@@ -3,9 +3,7 @@ import threadController from "../controllers/threadController.js";
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-	res.status(200).send('GET /threads');
-});
+router.get("/", threadController.getThread);
 
 router.post('/', threadController.createThread);
 

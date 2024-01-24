@@ -7,7 +7,7 @@ router.get('/', (req, res) => {
 	res.status(200).send('GET /users');
 });
 
-router.post('/', userController.createUser);
+router.post('/signup', userController.createUser);
 router.post('/login', userController.login);
 router.post('/authenticate', userController.authenticateUser);
 
